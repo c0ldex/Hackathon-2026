@@ -7,6 +7,9 @@
   
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.2/dist/jspdf.umd.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -17,6 +20,7 @@
             pierCyan: '#00AEEF',
             pierCyanHover: '#0095CD',
             pierGray: '#1C222C',
+            pierSidebar: '#0D1014',
           }
         }
       }
@@ -49,15 +53,153 @@
       scrollbar-width: thin;
       scrollbar-color: #D1D5DB #090B0E;
     }
+
+    #relatorioPdf {
+      position: absolute;
+      left: -12000px;
+      top: 0;
+      width: 794px;
+      background: #f4f6f8;
+      color: #1f2937;
+      font-family: "Segoe UI", Arial, sans-serif;
+      box-sizing: border-box;
+      padding: 28px 32px 36px;
+    }
+    #relatorioPdf * { box-sizing: border-box; }
+    #relatorioPdf .rp-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 2px solid #00AEEF;
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    #relatorioPdf .rp-kpis {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    #relatorioPdf .rp-kpi {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 10px;
+      text-align: center;
+    }
+    #relatorioPdf .rp-kpi h4 {
+      margin: 0 0 6px;
+      font-size: 11px;
+      color: #6b7280;
+      font-weight: 600;
+    }
+    #relatorioPdf .rp-kpi .val {
+      font-size: 26px;
+      font-weight: 800;
+      color: #00AEEF;
+      line-height: 1.1;
+    }
+    #relatorioPdf .rp-kpi .sub {
+      margin-top: 4px;
+      font-size: 10px;
+      color: #9ca3af;
+    }
+    #relatorioPdf .rp-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    #relatorioPdf .rp-card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 12px 14px 8px;
+    }
+    #relatorioPdf .rp-card h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      color: #374151;
+      font-weight: 700;
+    }
+    #relatorioPdf .rp-list {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    #relatorioPdf .rp-list li {
+      font-size: 11px;
+      line-height: 1.45;
+      color: #374151;
+      border-bottom: 1px solid #f3f4f6;
+      padding: 8px 0;
+    }
+    #relatorioPdf .rp-foot {
+      margin-top: 16px;
+      font-size: 10px;
+      color: #9ca3af;
+      border-top: 1px solid #e5e7eb;
+      padding-top: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
   </style>
 </head>
 
-<body class="bg-pierBg text-slate-100 min-h-screen font-sans flex flex-col justify-between selection:bg-pierCyan selection:text-black">
+<body class="bg-pierBg text-slate-100 h-screen font-sans selection:bg-pierCyan selection:text-black overflow-hidden">
+
+  <div id="appShell" class="flex h-full">
+
+    <!-- Backdrop mobile -->
+    <div id="sidebarBackdrop" class="fixed inset-0 bg-black/60 z-40 hidden md:hidden" onclick="fecharSidebar()"></div>
+
+    <!-- Sidebar estilo Gemini -->
+    <aside id="sidebar" class="fixed md:static z-50 inset-y-0 left-0 w-72 bg-pierSidebar border-r border-slate-800/80 flex flex-col shrink-0 -translate-x-full md:translate-x-0 transition-transform duration-200">
+      <div class="px-4 pt-4 pb-3 flex items-center justify-between gap-2">
+        <a href="#" class="flex items-center min-w-0" onclick="novaAnalise(); return false;">
+          <img src="piersec-ciberseguranca.png" alt="PierSec Cibersegurança" class="h-7 object-contain" />
+        </a>
+        <button type="button" class="md:hidden text-slate-400 hover:text-white p-1" onclick="fecharSidebar()" aria-label="Fechar menu">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+
+      <div class="px-3 pb-3">
+        <button type="button" onclick="novaAnalise()" class="w-full flex items-center gap-3 rounded-full border border-slate-700 bg-pierGray/80 hover:bg-pierGray text-sm text-slate-100 px-4 py-2.5 transition">
+          <span class="text-lg leading-none">+</span>
+          Nova análise
+        </button>
+      </div>
+
+      <div class="px-3 pb-2">
+        <div class="relative">
+          <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-4.35-4.35M17 11a6 6 0 11-12 0 6 6 0 0112 0z"/>
+          </svg>
+          <input id="buscaHistorico" type="search" placeholder="Buscar análises" oninput="renderHistorico()" class="w-full bg-pierBg border border-slate-800 rounded-full pl-9 pr-3 py-2 text-xs text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-pierCyan" />
+        </div>
+      </div>
+
+      <p class="px-5 pt-2 pb-1 text-[11px] uppercase tracking-widest text-slate-500 font-semibold">Recentes</p>
+
+      <nav id="listaHistorico" class="flex-1 overflow-y-auto px-2 pb-3 space-y-0.5">
+      </nav>
+
+      <div class="border-t border-slate-800/80 px-4 py-3 text-[11px] text-slate-500">
+        Histórico salvo neste navegador
+      </div>
+    </aside>
+
+    <!-- Coluna principal -->
+    <div class="flex-1 min-w-0 flex flex-col h-full overflow-hidden">
 
   <!-- Header PierSec (Sem botão de contato) -->
-  <header class="border-b border-slate-800/60 bg-pierBg/90 backdrop-blur sticky top-0 z-50">
+  <header class="border-b border-slate-800/60 bg-pierBg/90 backdrop-blur sticky top-0 z-30 shrink-0">
     <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
       <div class="flex items-center gap-3">
+        <button id="btnToggleSidebar" type="button" class="md:hidden text-slate-300 hover:text-white p-1 -ml-1" onclick="abrirSidebar()" aria-label="Abrir histórico">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+        </button>
         <a href="#" class="flex items-center">
           <img src="piersec-ciberseguranca.png" alt="PierSec Cibersegurança" class="h-8 md:h-9 object-contain" />
         </a>
@@ -71,8 +213,9 @@
     </div>
   </header>
 
+  <div class="flex-1 overflow-y-auto">
   <!-- Conteúdo Principal -->
-  <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
+  <main class="max-w-7xl mx-auto px-6 py-10 w-full">
     
     <!-- Hero / Título -->
     <div class="mb-10 text-left">
@@ -152,7 +295,7 @@
           </div>
         </div>
 
-        <button onclick="window.print()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 rounded text-xs font-semibold transition border border-slate-700">
+        <button id="btnRelatorio" onclick="gerarRelatorioPdf()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 rounded text-xs font-semibold transition border border-slate-700">
           📄 Gerar Relatório Executivo (PDF)
         </button>
       </div>
@@ -279,9 +422,58 @@
 
     </div>
   </footer>
+  </div>
+
+    </div>
+  </div>
+
+  <!-- Template do relatório (capturado para PDF, fora da tela) -->
+  <div id="relatorioPdf" aria-hidden="true">
+    <div class="rp-header">
+      <img src="piersec-ciberseguranca-cinza.png" alt="PierSec" style="height:48px;object-fit:contain;" />
+      <div style="text-align:right;">
+        <div style="font-size:16px;font-weight:800;color:#111827;">Relatório Executivo de Risco</div>
+        <div id="rpMeta" style="font-size:11px;color:#6b7280;margin-top:4px;"></div>
+      </div>
+    </div>
+    <div class="rp-kpis">
+      <div class="rp-kpi"><h4>Score de Risco</h4><div class="val" id="rpScore">0</div><div class="sub" id="rpNivel">—</div></div>
+      <div class="rp-kpi"><h4>Eventos analisados</h4><div class="val" id="rpEventos">0</div><div class="sub">registros SIEM</div></div>
+      <div class="rp-kpi"><h4>Vulnerabilidades</h4><div class="val" id="rpVulns">0</div><div class="sub">CVE distintas</div></div>
+      <div class="rp-kpi"><h4>Hosts correlacionados</h4><div class="val" id="rpHosts">0</div><div class="sub">CVE crítica + evento alto</div></div>
+    </div>
+    <div class="rp-grid">
+      <div class="rp-card">
+        <h3>CVEs por severidade</h3>
+        <canvas id="chartSeveridade" height="180"></canvas>
+      </div>
+      <div class="rp-card">
+        <h3>Distribuição de severidade</h3>
+        <canvas id="chartPizza" height="180"></canvas>
+      </div>
+    </div>
+    <div class="rp-card" style="margin-bottom:12px;">
+      <h3>Eventos por fonte</h3>
+      <canvas id="chartFontes" height="140"></canvas>
+    </div>
+    <div class="rp-grid">
+      <div class="rp-card">
+        <h3>Evidências e correlações</h3>
+        <ul class="rp-list" id="rpJustificativas"></ul>
+      </div>
+      <div class="rp-card">
+        <h3>Recomendações</h3>
+        <ul class="rp-list" id="rpRecomendacoes"></ul>
+      </div>
+    </div>
+    <div class="rp-foot">
+      <span id="rpConfidencial">Uso interno · PierSec</span>
+      <span>Gerado automaticamente pela plataforma de diagnóstico</span>
+    </div>
+  </div>
 
   <!-- Botão Flutuante do WhatsApp (Canto Inferior Direito) -->
-  <a href="https://api.whatsapp.com/send?phone=551332192277" target="_blank" rel="noopener noreferrer" aria-label="Contato via WhatsApp" class="fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#20ba5a] text-white p-3.5 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center">
+  <a href="https://api.whatsapp.com/send?phone=551332192277" target="_blank" rel="noopener noreferrer" aria-label="Contato via WhatsApp" class="no-print fixed bottom-6 right-6 z-50 bg-[#25D366] hover:bg-[#20ba5a] text-white p-3.5 rounded-full shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center">
     <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
       <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
     </svg>
@@ -289,25 +481,176 @@
 
   <!-- Script Tratado com Captura do Erro do Backend -->
   <script>
+    const HISTORY_KEY = "piersec.analysisHistory";
+    let analiseAtivaId = null;
+    let ultimaAnalise = null;
+    const graficosRelatorio = [];
+
+    function carregarHistorico() {
+      try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]");
+      } catch {
+        return [];
+      }
+    }
+
+    function gravarHistorico(itens) {
+      localStorage.setItem(HISTORY_KEY, JSON.stringify(itens.slice(0, 50)));
+    }
+
+    function formatarData(iso) {
+      const d = new Date(iso);
+      if (Number.isNaN(d.getTime())) return "";
+      return d.toLocaleString("pt-BR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" });
+    }
+
+    function aplicarResultado(data) {
+      ultimaAnalise = data;
+      document.getElementById("notaRisco").innerText = data.finalRiskScore ?? data.FinalRiskScore ?? 0;
+      document.getElementById("nivelPerigo").innerText = data.riskLevel ?? data.RiskLevel ?? "N/A";
+      document.getElementById("totalRegistros").innerText = data.totalEventsAnalyzed ?? data.TotalEventsAnalyzed ?? 0;
+      document.getElementById("totalVulns").innerText = data.totalVulnerabilitiesFound ?? data.TotalVulnerabilitiesFound ?? 0;
+
+      const lista = document.getElementById("listaMotivos");
+      lista.innerHTML = "";
+      const justificativas = data.justifications || data.Justifications || [];
+
+      if (justificativas.length > 0) {
+        justificativas.forEach((item) => {
+          const li = document.createElement("li");
+          li.className = "p-3.5 bg-pierBg/90 border border-slate-800 rounded text-xs text-slate-300 font-mono flex items-start gap-3 hover:border-pierCyan/40 transition";
+          li.innerHTML = `<span class="text-pierCyan font-bold">▶</span> <div></div>`;
+          li.querySelector("div").textContent = item;
+          lista.appendChild(li);
+        });
+      } else {
+        lista.innerHTML = '<li class="text-slate-400 text-xs p-3">Nenhuma ameaça ou vulnerabilidade identificada.</li>';
+      }
+    }
+
+    function renderHistorico() {
+      const lista = document.getElementById("listaHistorico");
+      const busca = (document.getElementById("buscaHistorico").value || "").trim().toLowerCase();
+      const itens = carregarHistorico().filter((item) => {
+        if (!busca) return true;
+        return (item.title || "").toLowerCase().includes(busca) || String(item.score ?? "").includes(busca);
+      });
+
+      if (!itens.length) {
+        lista.innerHTML = `<p class="px-3 py-6 text-center text-xs text-slate-500">${busca ? "Nenhum resultado." : "Nenhuma análise ainda. Processe uma planilha para aparecer aqui."}</p>`;
+        return;
+      }
+
+      lista.innerHTML = itens.map((item) => {
+        const ativo = item.id === analiseAtivaId;
+        return `
+          <div class="group relative rounded-xl ${ativo ? "bg-slate-800/80" : "hover:bg-slate-800/50"}">
+            <button type="button" onclick="abrirAnalise('${item.id}')" class="w-full text-left px-3 py-2.5 pr-9">
+              <div class="text-[13px] text-slate-100 truncate">${escapeHtml(item.title)}</div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${formatarData(item.createdAt)} · score ${item.score ?? 0}</div>
+            </button>
+            <button type="button" onclick="excluirAnalise('${item.id}', event)" class="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-slate-500 hover:text-red-400 p-1" aria-label="Excluir análise" title="Excluir">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M9 7V4h6v3M4 7h16"/></svg>
+            </button>
+          </div>`;
+      }).join("");
+    }
+
+    function escapeHtml(text) {
+      return String(text || "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    function salvarAnalise(filename, data) {
+      const itens = carregarHistorico();
+      const entry = {
+        id: crypto.randomUUID ? crypto.randomUUID() : String(Date.now()),
+        title: filename.replace(/\.xlsx$/i, "") || "Análise",
+        createdAt: data.analyzedAt || new Date().toISOString(),
+        score: data.finalRiskScore ?? data.FinalRiskScore ?? 0,
+        result: data,
+      };
+      itens.unshift(entry);
+      gravarHistorico(itens);
+      analiseAtivaId = entry.id;
+      renderHistorico();
+    }
+
+    function abrirAnalise(id) {
+      const item = carregarHistorico().find((x) => x.id === id);
+      if (!item) return;
+      analiseAtivaId = id;
+      aplicarResultado(item.result || {});
+      renderHistorico();
+      fecharSidebar();
+    }
+
+    function excluirAnalise(id, event) {
+      if (event) event.stopPropagation();
+      const itens = carregarHistorico().filter((x) => x.id !== id);
+      gravarHistorico(itens);
+      if (analiseAtivaId === id) {
+        analiseAtivaId = null;
+        novaAnalise(true);
+      } else {
+        renderHistorico();
+      }
+    }
+
+    function novaAnalise(skipResetFile) {
+      analiseAtivaId = null;
+      ultimaAnalise = null;
+      aplicarResultado({
+        finalRiskScore: 0,
+        riskLevel: "Aguardando",
+        totalEventsAnalyzed: 0,
+        totalVulnerabilitiesFound: 0,
+        justifications: [],
+      });
+      ultimaAnalise = null;
+      document.getElementById("listaMotivos").innerHTML =
+        '<li class="text-slate-500 text-xs italic p-4 text-center bg-pierBg/40 rounded border border-slate-800/40">Nenhum ficheiro processado. Submeta a planilha no painel acima.</li>';
+      if (!skipResetFile) {
+        const input = document.getElementById("fileInput");
+        if (input) input.value = "";
+      }
+      renderHistorico();
+      fecharSidebar();
+    }
+
+    function abrirSidebar() {
+      document.getElementById("sidebar").classList.remove("-translate-x-full");
+      document.getElementById("sidebarBackdrop").classList.remove("hidden");
+    }
+
+    function fecharSidebar() {
+      if (window.matchMedia("(min-width: 768px)").matches) return;
+      document.getElementById("sidebar").classList.add("-translate-x-full");
+      document.getElementById("sidebarBackdrop").classList.add("hidden");
+    }
+
     async function analisarPlanilha() {
-      const fileInput = document.getElementById('fileInput');
-      const btn = document.getElementById('btnProcessar');
+      const fileInput = document.getElementById("fileInput");
+      const btn = document.getElementById("btnProcessar");
       if (!fileInput.files[0]) {
         alert("Por favor, selecione um arquivo .xlsx!");
         return;
       }
 
       const formData = new FormData();
-      formData.append('file', fileInput.files[0]);
+      formData.append("file", fileInput.files[0]);
       if (btn) {
         btn.disabled = true;
         btn.innerText = "Processando...";
       }
 
       try {
-        const response = await fetch('/api/risk/upload', {
-          method: 'POST',
-          body: formData
+        const response = await fetch("/api/risk/upload", {
+          method: "POST",
+          body: formData,
         });
 
         if (!response.ok) {
@@ -316,29 +659,8 @@
         }
 
         const data = await response.json();
-
-        // Atualização Dinâmica
-        document.getElementById('notaRisco').innerText = data.finalRiskScore ?? data.FinalRiskScore ?? 0;
-        document.getElementById('nivelPerigo').innerText = data.riskLevel ?? data.RiskLevel ?? "N/A";
-        document.getElementById('totalRegistros').innerText = data.totalEventsAnalyzed ?? data.TotalEventsAnalyzed ?? 0;
-        document.getElementById('totalVulns').innerText = data.totalVulnerabilitiesFound ?? data.TotalVulnerabilitiesFound ?? 0;
-
-        const lista = document.getElementById('listaMotivos');
-        lista.innerHTML = '';
-
-        const justificativas = data.justifications || data.Justifications || [];
-
-        if (justificativas.length > 0) {
-          justificativas.forEach(item => {
-            const li = document.createElement('li');
-            li.className = "p-3.5 bg-pierBg/90 border border-slate-800 rounded text-xs text-slate-300 font-mono flex items-start gap-3 hover:border-pierCyan/40 transition";
-            li.innerHTML = `<span class="text-pierCyan font-bold">▶</span> <div>${item}</div>`;
-            lista.appendChild(li);
-          });
-        } else {
-          lista.innerHTML = '<li class="text-slate-400 text-xs p-3">Nenhuma ameaça ou vulnerabilidade identificada.</li>';
-        }
-
+        aplicarResultado(data);
+        salvarAnalise(fileInput.files[0].name, data);
       } catch (err) {
         console.error("Detalhes do erro:", err);
         alert("Erro no envio:\n" + err.message);
@@ -349,6 +671,201 @@
         }
       }
     }
+
+    function destruirGraficosRelatorio() {
+      while (graficosRelatorio.length) {
+        const chart = graficosRelatorio.pop();
+        try { chart.destroy(); } catch (_) {}
+      }
+    }
+
+    function preencherRelatorio(data) {
+      const score = data.finalRiskScore ?? 0;
+      const nivel = data.riskLevel ?? "N/A";
+      const eventos = data.totalEventsAnalyzed ?? 0;
+      const vulns = data.totalVulnerabilitiesFound ?? 0;
+      const hosts = (data.correlation && data.correlation.hostsWithCriticalCveAndHighEvent) || [];
+      const sev = data.severityBreakdown || {};
+      const fontes = (data.eventBreakdown && data.eventBreakdown.bySource) || {};
+      const titulo = data.filename || "planilha.xlsx";
+      const quando = data.analyzedAt ? formatarData(data.analyzedAt) : new Date().toLocaleString("pt-BR");
+
+      document.getElementById("rpScore").textContent = score;
+      document.getElementById("rpNivel").textContent = String(nivel).toUpperCase();
+      document.getElementById("rpEventos").textContent = Number(eventos).toLocaleString("pt-BR");
+      document.getElementById("rpVulns").textContent = Number(vulns).toLocaleString("pt-BR");
+      document.getElementById("rpHosts").textContent = hosts.length;
+      document.getElementById("rpMeta").textContent = `${titulo} · ${quando}`;
+      document.getElementById("rpConfidencial").textContent = data.confidentiality || "Uso interno · PierSec";
+
+      const listaJ = document.getElementById("rpJustificativas");
+      const listaR = document.getElementById("rpRecomendacoes");
+      listaJ.innerHTML = "";
+      listaR.innerHTML = "";
+      (data.justifications || []).forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = item;
+        listaJ.appendChild(li);
+      });
+      (data.recommendations || ["Revisar os achados críticos e validar os totais contra a planilha de origem."]).forEach((item) => {
+        const li = document.createElement("li");
+        li.textContent = "• " + item;
+        listaR.appendChild(li);
+      });
+
+      destruirGraficosRelatorio();
+
+      const labelsSev = ["Crítica", "Alta", "Média", "Baixa"];
+      const valoresSev = [sev.critical || 0, sev.high || 0, sev.medium || 0, sev.low || 0];
+      const coresSev = ["#ef4444", "#f59e0b", "#3b82f6", "#22c55e"];
+      const comum = {
+        animation: false,
+        plugins: {
+          legend: { labels: { color: "#4b5563", boxWidth: 12, font: { size: 10 } } },
+        },
+      };
+
+      graficosRelatorio.push(new Chart(document.getElementById("chartSeveridade"), {
+        type: "bar",
+        data: {
+          labels: labelsSev,
+          datasets: [{
+            label: "CVE",
+            data: valoresSev,
+            backgroundColor: coresSev,
+            borderRadius: 4,
+          }],
+        },
+        options: {
+          ...comum,
+          plugins: { ...comum.plugins, legend: { display: false } },
+          scales: {
+            x: { ticks: { color: "#6b7280", font: { size: 10 } }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { color: "#6b7280", font: { size: 10 } }, grid: { color: "#eef2f7" } },
+          },
+        },
+      }));
+
+      const pizzaVazia = valoresSev.every((n) => n === 0);
+      graficosRelatorio.push(new Chart(document.getElementById("chartPizza"), {
+        type: "pie",
+        data: {
+          labels: pizzaVazia ? ["Sem dados"] : labelsSev,
+          datasets: [{ data: pizzaVazia ? [1] : valoresSev, backgroundColor: pizzaVazia ? ["#d1d5db"] : coresSev }],
+        },
+        options: {
+          ...comum,
+          plugins: {
+            legend: { position: "bottom", labels: { color: "#4b5563", boxWidth: 10, font: { size: 10 } } },
+          },
+        },
+      }));
+
+      const nomesFonte = Object.keys(fontes);
+      const valoresFonte = nomesFonte.map((k) => fontes[k]);
+      graficosRelatorio.push(new Chart(document.getElementById("chartFontes"), {
+        type: "bar",
+        data: {
+          labels: nomesFonte.length ? nomesFonte : ["sem fonte"],
+          datasets: [{
+            label: "Eventos",
+            data: nomesFonte.length ? valoresFonte : [0],
+            backgroundColor: nomesFonte.map((_, i) => ["#3b82f6", "#00AEEF", "#6366f1", "#f43f5e", "#10b981", "#f59e0b"][i % 6]),
+            borderRadius: 4,
+          }],
+        },
+        options: {
+          ...comum,
+          plugins: { ...comum.plugins, legend: { display: false } },
+          scales: {
+            x: { ticks: { color: "#6b7280", font: { size: 10 } }, grid: { display: false } },
+            y: { beginAtZero: true, ticks: { color: "#6b7280", font: { size: 10 } }, grid: { color: "#eef2f7" } },
+          },
+        },
+      }));
+    }
+
+    async function gerarRelatorioPdf() {
+      if (!ultimaAnalise || ultimaAnalise.riskLevel === "Aguardando") {
+        alert("Processe uma planilha antes de gerar o relatório.");
+        return;
+      }
+
+      const btn = document.getElementById("btnRelatorio");
+      if (btn) {
+        btn.disabled = true;
+        btn.innerText = "Gerando PDF...";
+      }
+
+      const alvo = document.getElementById("relatorioPdf");
+      const bodyOverflow = document.body.style.overflow;
+      try {
+        preencherRelatorio(ultimaAnalise);
+        alvo.style.position = "fixed";
+        alvo.style.left = "0";
+        alvo.style.top = "0";
+        alvo.style.zIndex = "-1";
+        document.body.style.overflow = "visible";
+
+        const logo = alvo.querySelector("img");
+        if (logo && !logo.complete) {
+          await new Promise((resolve) => {
+            logo.onload = resolve;
+            logo.onerror = resolve;
+          });
+        }
+        await new Promise((resolve) => setTimeout(resolve, 150));
+
+        const canvas = await html2canvas(alvo, {
+          scale: 2,
+          backgroundColor: "#f4f6f8",
+          useCORS: true,
+          logging: false,
+          width: alvo.scrollWidth,
+          height: alvo.scrollHeight,
+          windowWidth: alvo.scrollWidth,
+          windowHeight: alvo.scrollHeight,
+        });
+
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+        const pageWidth = pdf.internal.pageSize.getWidth();
+        const pageHeight = pdf.internal.pageSize.getHeight();
+        const imgWidth = pageWidth;
+        const imgHeight = (canvas.height * imgWidth) / canvas.width;
+        const imgData = canvas.toDataURL("image/png");
+
+        let heightLeft = imgHeight;
+        let position = 0;
+        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+        while (heightLeft > 0) {
+          position = heightLeft - imgHeight;
+          pdf.addPage();
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+        }
+
+        const nome = (ultimaAnalise.filename || "relatorio").replace(/\.xlsx$/i, "");
+        pdf.save(`PierSec-Relatorio-${nome}.pdf`);
+      } catch (err) {
+        console.error(err);
+        alert("Não foi possível gerar o PDF:\n" + err.message);
+      } finally {
+        alvo.style.position = "";
+        alvo.style.left = "";
+        alvo.style.top = "";
+        alvo.style.zIndex = "";
+        document.body.style.overflow = bodyOverflow;
+        destruirGraficosRelatorio();
+        if (btn) {
+          btn.disabled = false;
+          btn.innerText = "📄 Gerar Relatório Executivo (PDF)";
+        }
+      }
+    }
+
+    renderHistorico();
   </script>
 </body>
 </html>
