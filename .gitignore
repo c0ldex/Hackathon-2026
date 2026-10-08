@@ -1,6 +1,7 @@
 __pycache__/
 *.pyc
 logs/
+.env
 .venv/
 _inspect_out.txt
 _inspect_docs.py
