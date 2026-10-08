@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+logs/
+.venv/
+_inspect_out.txt
+_inspect_docs.py
+_inspect2.py
+_test_analyze.py
