@@ -27,119 +27,111 @@
     }    
   </script>
 
-  <!-- Estilo da Scrollbar Personalizada -->
   <style>
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
-
-    ::-webkit-scrollbar-track {
-      background: #090B0E;
-    }
-
-    ::-webkit-scrollbar-thumb {
-      background: #D1D5DB;
-      border-radius: 9999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-      background: #00AEEF;
-    }
+    ::-webkit-scrollbar-track { background: #090B0E; }
+    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: #00AEEF; }
 
     * {
       scrollbar-width: thin;
       scrollbar-color: #D1D5DB #090B0E;
     }
 
+    /* Template Executivo Oculto para PDF (Compacto em 2 Páginas, Fundo Claro) */
     #relatorioPdf {
       position: absolute;
       left: -12000px;
       top: 0;
-      width: 794px;
-      background: #f4f6f8;
-      color: #1f2937;
-      font-family: "Segoe UI", Arial, sans-serif;
+      width: 850px;
+      background: #FFFFFF;
+      color: #0F172A;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
       box-sizing: border-box;
-      padding: 28px 32px 36px;
+      visibility: hidden;
+      pointer-events: none;
     }
-    #relatorioPdf * { box-sizing: border-box; }
-    #relatorioPdf .rp-header {
+
+    .pdf-page-block {
+      background: #FFFFFF;
+      padding: 28px 30px;
+      box-sizing: border-box;
+      width: 850px;
+      height: 1120px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .pdf-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      border-bottom: 2px solid #00AEEF;
-      padding-bottom: 14px;
-      margin-bottom: 18px;
+      border-bottom: 3px solid #00AEEF;
+      padding-bottom: 10px;
+      margin-bottom: 14px;
     }
-    #relatorioPdf .rp-kpis {
+
+    .pdf-kpi-grid {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 14px;
     }
-    #relatorioPdf .rp-kpi {
-      background: #fff;
-      border: 1px solid #e5e7eb;
+
+    .pdf-kpi-card {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
       border-radius: 8px;
-      padding: 12px 10px;
+      padding: 10px;
       text-align: center;
     }
-    #relatorioPdf .rp-kpi h4 {
-      margin: 0 0 6px;
-      font-size: 11px;
-      color: #6b7280;
-      font-weight: 600;
-    }
-    #relatorioPdf .rp-kpi .val {
-      font-size: 26px;
+
+    .pdf-section-title {
+      font-size: 12px;
       font-weight: 800;
-      color: #00AEEF;
-      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #0F172A;
+      border-left: 4px solid #00AEEF;
+      padding-left: 8px;
+      margin-top: 10px;
+      margin-bottom: 10px;
     }
-    #relatorioPdf .rp-kpi .sub {
-      margin-top: 4px;
+
+    .pdf-table {
+      width: 100%;
+      border-collapse: collapse;
       font-size: 10px;
-      color: #9ca3af;
+      margin-top: 6px;
     }
-    #relatorioPdf .rp-grid {
-      display: grid;
-      grid-template-columns: 1.2fr 0.8fr;
-      gap: 12px;
-      margin-bottom: 12px;
+
+    .pdf-table th {
+      background: #0F172A;
+      color: #FFFFFF;
+      text-align: left;
+      padding: 7px 9px;
+      font-size: 9.5px;
+      text-transform: uppercase;
     }
-    #relatorioPdf .rp-card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 8px;
-      padding: 12px 14px 8px;
+
+    .pdf-table td {
+      border-bottom: 1px solid #E2E8F0;
+      padding: 7px 9px;
+      color: #334155;
     }
-    #relatorioPdf .rp-card h3 {
-      margin: 0 0 8px;
-      font-size: 13px;
-      color: #374151;
-      font-weight: 700;
-    }
-    #relatorioPdf .rp-list {
-      margin: 0;
-      padding: 0;
-      list-style: none;
-    }
-    #relatorioPdf .rp-list li {
-      font-size: 11px;
-      line-height: 1.45;
-      color: #374151;
-      border-bottom: 1px solid #f3f4f6;
-      padding: 8px 0;
-    }
-    #relatorioPdf .rp-foot {
-      margin-top: 16px;
-      font-size: 10px;
-      color: #9ca3af;
-      border-top: 1px solid #e5e7eb;
-      padding-top: 10px;
+
+    .pdf-footer {
+      border-top: 1px solid #E2E8F0;
+      padding-top: 8px;
       display: flex;
       justify-content: space-between;
+      font-size: 9.5px;
+      color: #64748B;
+      margin-top: auto;
     }
   </style>
 </head>
@@ -229,7 +221,7 @@
       </header>
 
       <div class="flex-1 overflow-y-auto">
-        <!-- Conteúdo Principal -->
+        <!-- Conteúdo Principal da Web -->
         <main class="max-w-7xl mx-auto px-6 py-10 w-full">
           
           <!-- Hero / Título -->
@@ -246,7 +238,7 @@
             </p>
           </div>
 
-          <!-- Caixa de Seleção de Arquivo (Sumir após análise ser concluída) -->
+          <!-- Caixa de Seleção de Arquivo -->
           <div id="boxImportar" class="bg-pierCard border border-slate-800 p-6 rounded-lg shadow-xl mb-10 max-w-2xl">
             <div class="flex items-center gap-3 mb-4">
               <span class="bg-pierCyan/10 text-pierCyan text-xs font-bold px-2.5 py-1 rounded">01</span>
@@ -259,14 +251,16 @@
             </div>
           </div>
 
-          <!-- Indicador Visual de Processamento / Loading -->
-          <div id="loadingIndicator" class="hidden my-12 bg-pierCard border border-pierCyan/30 rounded-lg p-8 text-center max-w-2xl mx-auto shadow-2xl">
-            <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-pierCyan border-t-transparent mb-4"></div>
-            <h3 class="text-lg font-bold text-white">Processando planilha...</h3>
-            <p class="text-xs text-slate-400 mt-2">Extraindo eventos, correlacionando vulnerabilidades e gerando inteligência de risco. Por favor, aguarde.</p>
+          <!-- Indicador Visual de Processamento / Loading (Alinhado e com ícone ciano visível) -->
+          <div id="loadingIndicator" class="hidden bg-pierCard border border-slate-800 p-8 rounded-lg shadow-xl mb-10 max-w-2xl text-center">
+            <div class="flex justify-center mb-3">
+              <div class="animate-spin rounded-full h-9 w-9 border-4 border-pierCyan border-t-transparent"></div>
+            </div>
+            <h3 class="text-base font-bold text-white">Processando planilha...</h3>
+            <p class="text-xs text-slate-400 mt-1.5">Extraindo eventos, correlacionando vulnerabilidades e gerando inteligência de risco. Por favor, aguarde.</p>
           </div>
 
-          <!-- ÁREA RESULTADO: Oculta até que uma planilha seja analisada -->
+          <!-- ÁREA RESULTADO DA TELA -->
           <div id="resultsContainer" class="hidden space-y-8">
             
             <!-- Grid de Score e Métricas -->
@@ -315,11 +309,11 @@
                 </div>
 
                 <div class="space-y-2">
-                  <button id="btnRelatorio" onclick="gerarRelatorioPdf()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 rounded text-xs font-semibold transition border border-slate-700">
+                  <button id="btnRelatorio" onclick="gerarRelatorioPdf()" class="w-full bg-pierCyan hover:bg-pierCyanHover text-black py-2.5 rounded text-xs font-bold transition shadow-lg shadow-pierCyan/20 uppercase tracking-wider">
                     📄 Gerar Relatório Executivo (PDF)
                   </button>
                   <button id="btnHtml" onclick="baixarRelatorioHtml()" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 rounded text-xs font-semibold transition border border-slate-700">
-                    Baixar relatório HTML (gerado no servidor)
+                    Baixar relatório HTML
                   </button>
                 </div>
               </div>
@@ -423,55 +417,115 @@
     </div>
   </div>
 
-  <!-- Template oculto do relatório PDF -->
+  <!-- TEMPLATE EXCLUSIVO DO RELATÓRIO PDF (COMPACTO EM 2 PÁGINAS) -->
   <div id="relatorioPdf" aria-hidden="true">
-    <div class="rp-header">
-      <img src="piersec-ciberseguranca-cinza.png" alt="PierSec" style="height:48px;object-fit:contain;" />
-      <div style="text-align:right;">
-        <div style="font-size:16px;font-weight:800;color:#111827;">Relatório Executivo de Risco</div>
-        <div id="rpMeta" style="font-size:11px;color:#6b7280;margin-top:4px;"></div>
+    
+    <!-- PÁGINA 1: DASHBOARD DE MÉTRICAS E GRÁFICOS COMPACTOS -->
+    <div id="pdfBlock1" class="pdf-page-block">
+      <div>
+        <div class="pdf-header">
+          <img src="piersec-ciberseguranca-cinza.png" alt="PierSec" style="height: 38px; object-fit: contain;" />
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: 800; color: #0F172A;">RELATÓRIO EXECUTIVO DE RISCO</div>
+            <div id="rpMeta" style="font-size: 9.5px; color: #00AEEF; font-weight: 700; margin-top: 1px;">PÁGINA 1 DE 2 · DASHBOARD VISUAL</div>
+          </div>
+        </div>
+
+        <div class="pdf-kpi-grid">
+          <div class="pdf-kpi-card">
+            <div style="font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Score de Risco</div>
+            <div id="rpScore" style="font-size: 26px; font-weight: 900; color: #00AEEF; margin: 1px 0;">0</div>
+            <div id="rpNivel" style="font-size: 9.5px; font-weight: 800; color: #0F172A; text-transform: uppercase;">—</div>
+          </div>
+          <div class="pdf-kpi-card">
+            <div style="font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Eventos Analisados</div>
+            <div id="rpEventos" style="font-size: 20px; font-weight: 800; color: #0F172A; margin: 1px 0;">0</div>
+            <div style="font-size: 8px; color: #94A3B8;">Registros SIEM</div>
+          </div>
+          <div class="pdf-kpi-card">
+            <div style="font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Vulnerabilidades</div>
+            <div id="rpVulns" style="font-size: 20px; font-weight: 800; color: #00AEEF; margin: 1px 0;">0</div>
+            <div style="font-size: 8px; color: #94A3B8;">CVEs Distintas</div>
+          </div>
+          <div class="pdf-kpi-card">
+            <div style="font-size: 8.5px; font-weight: 700; color: #64748B; text-transform: uppercase;">Hosts Afetados</div>
+            <div id="rpHosts" style="font-size: 20px; font-weight: 800; color: #EF4444; margin: 1px 0;">0</div>
+            <div style="font-size: 8px; color: #94A3B8;">Correlação R1</div>
+          </div>
+        </div>
+
+        <div class="pdf-section-title">Métricas Visuais e Distribuição de Risco</div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 8px;">
+          <div>
+            <div style="font-size: 9.5px; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 4px;">1. CVEs por Severidade</div>
+            <div style="height: 200px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px; border-radius: 8px;">
+              <canvas id="chartSeveridade" height="184"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 9.5px; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 4px;">2. Proporção de Severidade</div>
+            <div style="height: 200px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px; border-radius: 8px;">
+              <canvas id="chartPizza" height="184"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 9.5px; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 4px;">3. Eventos por Fonte de Coleta</div>
+            <div style="height: 200px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px; border-radius: 8px;">
+              <canvas id="chartFontes" height="184"></canvas>
+            </div>
+          </div>
+
+          <div>
+            <div style="font-size: 9.5px; font-weight: 700; color: #334155; text-transform: uppercase; margin-bottom: 4px;">4. Alertas SIEM por Nível</div>
+            <div style="height: 200px; background: #F8FAFC; border: 1px solid #E2E8F0; padding: 8px; border-radius: 8px;">
+              <canvas id="chartNiveis" height="184"></canvas>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="pdf-footer">
+        <span>Uso Interno · PierSec Cibersegurança</span>
+        <span>Página 1 de 2</span>
       </div>
     </div>
-    <div class="rp-kpis">
-      <div class="rp-kpi"><h4>Score de Risco</h4><div class="val" id="rpScore">0</div><div class="sub" id="rpNivel">—</div></div>
-      <div class="rp-kpi"><h4>Eventos analisados</h4><div class="val" id="rpEventos">0</div><div class="sub">registros SIEM</div></div>
-      <div class="rp-kpi"><h4>Vulnerabilidades</h4><div class="val" id="rpVulns">0</div><div class="sub">CVE distintas</div></div>
-      <div class="rp-kpi"><h4>Hosts correlacionados</h4><div class="val" id="rpHosts">0</div><div class="sub">CVE crítica + evento alto</div></div>
-    </div>
-    <div class="rp-grid">
-      <div class="rp-card">
-        <h3>CVEs por severidade</h3>
-        <canvas id="chartSeveridade" height="180"></canvas>
+
+    <!-- PÁGINA 2: EVIDÊNCIAS + PLANO DE REMEDIAÇÃO JUNTOS -->
+    <div id="pdfBlock2" class="pdf-page-block">
+      <div>
+        <div class="pdf-header">
+          <img src="piersec-ciberseguranca-cinza.png" alt="PierSec" style="height: 38px; object-fit: contain;" />
+          <div style="text-align: right;">
+            <div style="font-size: 14px; font-weight: 800; color: #0F172A;">TRILHA DE CORRELAÇÕES & REMEDIAÇÃO</div>
+            <div style="font-size: 9.5px; color: #00AEEF; font-weight: 700; margin-top: 1px;">PÁGINA 2 DE 2 · PLANO DE AÇÃO TÉCNICO</div>
+          </div>
+        </div>
+
+        <div class="pdf-section-title">Trilha de Evidências e Achados Identificados</div>
+        <div id="rpListEvidencias" style="display: flex; flex-direction: column; gap: 8px; margin-top: 6px; margin-bottom: 14px;"></div>
+
+        <div class="pdf-section-title">Ações Recomendadas (Prioridade x Esforço)</div>
+        <table class="pdf-table">
+          <thead>
+            <tr>
+              <th style="width: 12%;">PRIORIDADE</th>
+              <th style="width: 62%;">AÇÃO RECOMENDADA / JUSTIFICATIVA</th>
+              <th style="width: 26%;">IMPACTO E ESFORÇO</th>
+            </tr>
+          </thead>
+          <tbody id="rpTableRecs"></tbody>
+        </table>
       </div>
-      <div class="rp-card">
-        <h3>Distribuição de severidade</h3>
-        <canvas id="chartPizza" height="180"></canvas>
+
+      <div class="pdf-footer">
+        <span>Uso Interno · PierSec Cibersegurança</span>
+        <span>Página 2 de 2</span>
       </div>
     </div>
-    <div class="rp-card" style="margin-bottom:12px;">
-      <h3>Eventos por fonte</h3>
-      <canvas id="chartFontes" height="140"></canvas>
-    </div>
-    <div class="rp-grid">
-      <div class="rp-card">
-        <h3>Evidências e correlações</h3>
-        <ul class="rp-list" id="rpJustificativas"></ul>
-      </div>
-      <div class="rp-card">
-        <h3>Recomendações</h3>
-        <ul class="rp-list" id="rpRecomendacoes"></ul>
-      </div>
-    </div>
-    <div class="rp-card" style="margin-bottom:12px;">
-      <h3>Como estamos / mais grave / agora</h3>
-      <p id="rpComo" style="font-size:11px;line-height:1.45;color:#374151;"></p>
-      <p id="rpGrave" style="font-size:11px;line-height:1.45;color:#374151;"></p>
-      <p id="rpAgora" style="font-size:11px;line-height:1.45;color:#374151;"></p>
-    </div>
-    <div class="rp-foot">
-      <span id="rpConfidencial">Uso interno · PierSec</span>
-      <span>Gerado automaticamente pela plataforma de diagnóstico</span>
-    </div>
+
   </div>
 
   <script>
@@ -577,11 +631,9 @@
       analiseAtivaId = null;
       ultimaAnalise = null;
       
-      // Limpa input
       const fileInput = document.getElementById("fileInput");
       if (fileInput) fileInput.value = "";
 
-      // Mostra caixa de importar, oculta resultados e loading
       document.getElementById("boxImportar")?.classList.remove("hidden");
       document.getElementById("resultsContainer")?.classList.add("hidden");
       document.getElementById("loadingIndicator")?.classList.add("hidden");
@@ -601,7 +653,6 @@
 
       const file = fileInput.files[0];
 
-      // Esconde a caixa de seleção de arquivo e exibe o indicador de carregamento
       boxImportar.classList.add("hidden");
       results.classList.add("hidden");
       loading.classList.remove("hidden");
@@ -628,7 +679,6 @@
 
         const data = await response.json();
         
-        // Exibe resultados
         aplicarResultado(data);
         salvarAnalise(file.name, data);
 
@@ -638,7 +688,6 @@
         console.error("Detalhes do erro:", err);
         alert("Erro no processamento:\n" + err.message);
         
-        // Em caso de erro, reexibe a caixa de seleção
         loading.classList.add("hidden");
         boxImportar.classList.remove("hidden");
         fileInput.value = "";
@@ -658,7 +707,6 @@
       document.getElementById("resumoAgora").innerText = sum.nextStep || "—";
       document.getElementById("confidencialidade").innerText = data.confidentiality || "";
 
-      // Oculta caixa de importação se estamos apresentando resultados
       document.getElementById("boxImportar")?.classList.add("hidden");
       document.getElementById("resultsContainer")?.classList.remove("hidden");
 
@@ -807,7 +855,7 @@
       mostrarLogin();
     }
 
-    // --- GERAÇÃO DE RELATÓRIOS ---
+    // --- GERAÇÃO DO NOVO RELATÓRIO PDF EM 2 PÁGINAS ---
     function destruirGraficosRelatorio() {
       while (graficosRelatorio.length) {
         const chart = graficosRelatorio.pop();
@@ -832,61 +880,119 @@
       document.getElementById("rpVulns").textContent = Number(vulns).toLocaleString("pt-BR");
       document.getElementById("rpHosts").textContent = hosts.length;
       document.getElementById("rpMeta").textContent = `${titulo} · ${quando}`;
-      document.getElementById("rpConfidencial").textContent = data.confidentiality || "Uso interno · PierSec";
-      
-      const sum = data.executiveSummary || {};
-      if (document.getElementById("rpComo")) document.getElementById("rpComo").textContent = sum.situation || "";
-      if (document.getElementById("rpGrave")) document.getElementById("rpGrave").textContent = sum.worst || "";
-      if (document.getElementById("rpAgora")) document.getElementById("rpAgora").textContent = sum.nextStep || "";
 
-      const listaJ = document.getElementById("rpJustificativas");
-      const listaR = document.getElementById("rpRecomendacoes");
-      listaJ.innerHTML = "";
-      listaR.innerHTML = "";
-      (data.justifications || []).forEach((item) => {
-        const li = document.createElement("li");
-        li.textContent = item;
-        listaJ.appendChild(li);
+      // Preencher tabela de recomendações na Página 2
+      const tableRecs = document.getElementById("rpTableRecs");
+      tableRecs.innerHTML = "";
+      (data.recommendations || []).slice(0, 5).forEach((item) => {
+        const tr = document.createElement("tr");
+        const prio = item.priority || "P2";
+        const action = item.action || item;
+        const imp = item.impact || "Médio";
+        const eff = item.effort || "Médio";
+
+        tr.innerHTML = `
+          <td style="font-weight: 800; color: #00AEEF; font-size: 10px;">${escapeHtml(prio)}</td>
+          <td>
+            <div style="font-weight: 700; color: #0F172A; font-size: 10px;">${escapeHtml(action)}</div>
+            <div style="font-size: 9px; color: #64748B; margin-top: 2px;">${escapeHtml(item.rationale || "")}</div>
+          </td>
+          <td style="font-size: 9px; color: #334155;">Imp: ${escapeHtml(imp)}<br>Esf: ${escapeHtml(eff)}</td>
+        `;
+        tableRecs.appendChild(tr);
       });
-      (data.recommendations || []).forEach((item) => {
-        const li = document.createElement("li");
-        li.textContent = "• " + (item.action || item);
-        listaR.appendChild(li);
+
+      // Preencher evidências na Página 2
+      const listEvidencias = document.getElementById("rpListEvidencias");
+      listEvidencias.innerHTML = "";
+      (data.evidenceTrail || []).slice(0, 4).forEach((e) => {
+        const card = document.createElement("div");
+        card.style.cssText = "background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 6px; padding: 8px 10px;";
+        card.innerHTML = `
+          <div style="display: flex; justify-content: space-between; font-size: 10px; font-weight: 800; color: #0F172A; margin-bottom: 2px;">
+            <span>${escapeHtml(e.id)} · ${escapeHtml(e.title)}</span>
+            <span style="color: #00AEEF; font-size: 9px;">${escapeHtml(e.severity)}</span>
+          </div>
+          <div style="font-size: 9px; color: #475569; line-height: 1.3;">${escapeHtml(e.meaning || "")}</div>
+        `;
+        listEvidencias.appendChild(card);
       });
 
       destruirGraficosRelatorio();
 
+      // Paleta Oficial PierSec nos Gráficos sobre fundo claro
       const labelsSev = ["Crítica", "Alta", "Média", "Baixa"];
       const valoresSev = [sev.critical || 0, sev.high || 0, sev.medium || 0, sev.low || 0];
-      const coresSev = ["#ef4444", "#f59e0b", "#3b82f6", "#22c55e"];
+      const coresSev = ["#EF4444", "#F59E0B", "#00AEEF", "#10B981"];
 
+      // 1. Gráfico de Barras por Severidade
       graficosRelatorio.push(new Chart(document.getElementById("chartSeveridade"), {
         type: "bar",
         data: {
           labels: labelsSev,
-          datasets: [{ label: "CVE", data: valoresSev, backgroundColor: coresSev, borderRadius: 4 }],
+          datasets: [{ label: "Vulnerabilidades", data: valoresSev, backgroundColor: coresSev, borderRadius: 4 }],
         },
-        options: { animation: false, plugins: { legend: { display: false } } }
+        options: {
+          animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { font: { size: 9, weight: 'bold' }, color: "#475569" }, grid: { display: false } },
+            y: { ticks: { font: { size: 9 }, color: "#64748B" }, grid: { color: "#F1F5F9" } }
+          }
+        }
       }));
 
+      // 2. Gráfico de Pizza por Proporção
       graficosRelatorio.push(new Chart(document.getElementById("chartPizza"), {
-        type: "pie",
+        type: "doughnut",
         data: {
           labels: labelsSev,
           datasets: [{ data: valoresSev, backgroundColor: coresSev }],
         },
-        options: { animation: false }
+        options: {
+          animation: false,
+          plugins: { legend: { position: "right", labels: { font: { size: 8.5 }, color: "#334155", boxWidth: 9 } } }
+        }
       }));
 
+      // 3. Gráfico de Eventos por Fonte
       const nomesFonte = Object.keys(fontes);
       const valoresFonte = nomesFonte.map((k) => fontes[k]);
       graficosRelatorio.push(new Chart(document.getElementById("chartFontes"), {
         type: "bar",
         data: {
-          labels: nomesFonte.length ? nomesFonte : ["sem fonte"],
+          labels: nomesFonte.length ? nomesFonte : ["SIEM"],
           datasets: [{ label: "Eventos", data: nomesFonte.length ? valoresFonte : [0], backgroundColor: "#00AEEF", borderRadius: 4 }],
         },
-        options: { animation: false, plugins: { legend: { display: false } } }
+        options: {
+          animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { font: { size: 9, weight: 'bold' }, color: "#475569" }, grid: { display: false } },
+            y: { ticks: { font: { size: 9 }, color: "#64748B" }, grid: { color: "#F1F5F9" } }
+          }
+        }
+      }));
+
+      // 4. Gráfico de Níveis de Alerta SIEM
+      const highEvents = (data.eventBreakdown && data.eventBreakdown.highOrAbove) || 0;
+      const totalEvents = data.totalEventsAnalyzed || 0;
+      const normalEvents = Math.max(0, totalEvents - highEvents);
+
+      graficosRelatorio.push(new Chart(document.getElementById("chartNiveis"), {
+        type: "bar",
+        data: {
+          labels: ["Até Nível 7", "Nível 8+ (Crítico)"],
+          datasets: [{ label: "Alertas", data: [normalEvents, highEvents], backgroundColor: ["#00AEEF", "#EF4444"], borderRadius: 4 }],
+        },
+        options: {
+          animation: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { ticks: { font: { size: 9, weight: 'bold' }, color: "#475569" }, grid: { display: false } },
+            y: { ticks: { font: { size: 9 }, color: "#64748B" }, grid: { color: "#F1F5F9" } }
+          }
+        }
       }));
     }
 
@@ -899,46 +1005,38 @@
       const btn = document.getElementById("btnRelatorio");
       if (btn) {
         btn.disabled = true;
-        btn.innerText = "Gerando PDF...";
+        btn.innerText = "Gerando PDF Executivo...";
       }
 
-      const alvo = document.getElementById("relatorioPdf");
-      const bodyOverflow = document.body.style.overflow;
+      const container = document.getElementById("relatorioPdf");
       try {
         preencherRelatorio(ultimaAnalise);
-        alvo.style.position = "fixed";
-        alvo.style.left = "0";
-        alvo.style.top = "0";
-        alvo.style.zIndex = "-1";
-        document.body.style.overflow = "visible";
+        container.style.visibility = "visible";
 
-        await new Promise((resolve) => setTimeout(resolve, 200));
-
-        const canvas = await html2canvas(alvo, {
-          scale: 2,
-          backgroundColor: "#f4f6f8",
-          useCORS: true,
-          logging: false,
-        });
+        await new Promise((resolve) => setTimeout(resolve, 250));
 
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
         const pageWidth = pdf.internal.pageSize.getWidth();
-        const imgWidth = pageWidth;
-        const imgHeight = (canvas.height * imgWidth) / canvas.width;
-        const imgData = canvas.toDataURL("image/png");
+        const pageHeight = pdf.internal.pageSize.getHeight();
 
-        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
-        pdf.save(`PierSec-Relatorio-${ultimaAnalise.filename || "risco"}.pdf`);
+        // Renderizar Página 1: Dashboards e Gráficos
+        const block1 = document.getElementById("pdfBlock1");
+        const canvas1 = await html2canvas(block1, { scale: 2, backgroundColor: "#FFFFFF", useCORS: true, logging: false });
+        pdf.addImage(canvas1.toDataURL("image/png"), "PNG", 0, 0, pageWidth, pageHeight);
+
+        // Renderizar Página 2: Evidências e Plano de Remediação
+        const block2 = document.getElementById("pdfBlock2");
+        const canvas2 = await html2canvas(block2, { scale: 2, backgroundColor: "#FFFFFF", useCORS: true, logging: false });
+        pdf.addPage();
+        pdf.addImage(canvas2.toDataURL("image/png"), "PNG", 0, 0, pageWidth, pageHeight);
+
+        pdf.save(`PierSec-Relatorio-Executivo-${ultimaAnalise.filename || "risco"}.pdf`);
       } catch (err) {
         console.error(err);
         alert("Não foi possível gerar o PDF:\n" + err.message);
       } finally {
-        alvo.style.position = "";
-        alvo.style.left = "";
-        alvo.style.top = "";
-        alvo.style.zIndex = "";
-        document.body.style.overflow = bodyOverflow;
+        container.style.visibility = "hidden";
         destruirGraficosRelatorio();
         if (btn) {
           btn.disabled = false;
